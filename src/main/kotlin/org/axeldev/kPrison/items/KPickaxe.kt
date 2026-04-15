@@ -13,6 +13,7 @@ data class KPickaxe(
     val XP: Int,
     val enchantments: List<Upgrades> = emptyList()
 )
+
 class KPickaxeItem {
     fun donnerPioche(joueur: Player): ItemStack {
         val item = ItemStack(Material.WOODEN_PICKAXE)

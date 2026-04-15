@@ -17,7 +17,7 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 
-class PickaxeListener( private val prisonerManager: PrisonerManager ) : Listener {
+class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
@@ -27,7 +27,7 @@ class PickaxeListener( private val prisonerManager: PrisonerManager ) : Listener
         if (item.hasItemMeta()) {
             LevelManager.handleBlockBreak(item)
         }
-            applyPassiveEffects(player, item)
+        applyPassiveEffects(player, item)
     }
 
     @EventHandler

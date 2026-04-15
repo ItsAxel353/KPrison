@@ -60,7 +60,8 @@ class MineManager(private val databaseManager: DatabaseManager) {
         regenerateMine(mine)
         databaseManager.saveMine(mine)
 
-        val message = LegacyComponentSerializer.legacyAmpersand().deserialize("&6La mine &e${mine.id} &6a été réinitialisée !")
+        val message =
+            LegacyComponentSerializer.legacyAmpersand().deserialize("&6La mine &e${mine.id} &6a été réinitialisée !")
         Bukkit.broadcast(message)
 
         return true

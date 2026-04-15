@@ -10,7 +10,7 @@ class PrisonerManager(private val databaseManager: DatabaseManager) {
     private val prisoners = mutableMapOf<UUID, Prisoner>()
 
     fun getPrisoner(uuid: UUID): Prisoner {
-        return prisoners.getOrPut(uuid) { 
+        return prisoners.getOrPut(uuid) {
             // Charger depuis la base de données ou créer un nouveau
             databaseManager.loadPrisoner(uuid.toString()) ?: run {
                 // Créer un nouveau prisonnier avec le nom du joueur

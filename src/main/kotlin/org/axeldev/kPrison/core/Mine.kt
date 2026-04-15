@@ -16,7 +16,7 @@ data class Mine(
     val blocks: Map<Material, Double>,
     val resetDelay: Int,
     var lastReset: Long = System.currentTimeMillis()
-    ) {
+) {
 
     fun isResetDue(): Boolean {
         return System.currentTimeMillis() - lastReset >= resetDelay * 1000L

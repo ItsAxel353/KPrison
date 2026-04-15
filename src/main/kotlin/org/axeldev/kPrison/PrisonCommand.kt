@@ -57,9 +57,11 @@ class PrisonCommand(
             "balance", "bal" -> {
                 player.sendMessage("Votre solde : ${prisoner.balance} €")
             }
+
             "rank" -> {
                 player.sendMessage("Votre rang : ${prisoner.Rank}")
             }
+
             "promote" -> {
                 if (rankManager.promotePrisoner(prisoner)) {
                     prisonerManager.savePrisoner(prisoner)
@@ -68,6 +70,7 @@ class PrisonCommand(
                     player.sendMessage("§cVous n'avez pas assez d'argent pour être promu.")
                 }
             }
+
             "mine" -> {
                 val mineId = args.getOrNull(1)
                 if (mineId == null) {
@@ -86,6 +89,7 @@ class PrisonCommand(
                 player.teleport(mine.teleportLocation)
                 player.sendTitle("§aTéléporté à la mine ${mine.id}.", "", 10, 70, 20)
             }
+
             "reset", "resetmine" -> {
                 // Vérifier la permission
                 if (!player.hasPermission("prison.admin") && !player.isOp) {
@@ -103,6 +107,7 @@ class PrisonCommand(
                     player.sendMessage("§cMine ${mineId} introuvable.")
                 }
             }
+
             "setspawn" -> {
                 // Vérifier la permission
                 if (!player.hasPermission("prison.admin") && !player.isOp) {
@@ -120,6 +125,7 @@ class PrisonCommand(
                     player.sendMessage("§cMine ${mineId.uppercase()} introuvable.")
                 }
             }
+
             "createmine" -> {
                 // Vérifier la permission
                 if (!player.hasPermission("prison.admin") && !player.isOp) {
@@ -168,22 +174,27 @@ class PrisonCommand(
                 mineManager.addMine(mine)
                 player.sendMessage("§aMine ${mineId} créée avec succès.")
             }
+
             "pos1" -> {
                 pos1[player.uniqueId.toString()] = player.location
                 player.sendMessage("§aPosition 1 définie à votre position.")
             }
+
             "pos2" -> {
                 pos2[player.uniqueId.toString()] = player.location
                 player.sendMessage("§aPosition 2 définie à votre position.")
             }
+
             "pickaxe" -> {
                 val pickaxe = KPickaxeItem().donnerPioche(player)
                 player.inventory.addItem(pickaxe)
                 player.sendMessage("§aVous avez reçu une KPickaxe de niveau 1.")
             }
+
             "upgrade" -> {
                 PickaxeMenu.UpgradeGUI.open(player)
             }
+
             else -> {
                 player.sendMessage("Commandes disponibles : /prison balance, /prison rank, /prison promote, /prison mine <id>, /prison reset <id>, /prison setspawn <id>, /prison createmine <id> <blocks>")
             }

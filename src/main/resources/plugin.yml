@@ -11,7 +11,7 @@ commands:
   prison:
     description: "Commandes pour le plugin prison"
     usage: "/<command> <subcommand>"
-    aliases: [p]
+    aliases: [ p ]
 
 permissions:
   prison.admin:

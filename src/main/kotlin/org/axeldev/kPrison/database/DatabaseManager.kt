@@ -78,7 +78,8 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
         try {
             // Table des mines
             connection.createStatement().use { stmt ->
-                stmt.executeUpdate("""
+                stmt.executeUpdate(
+                    """
                     CREATE TABLE IF NOT EXISTS mines (
                         id VARCHAR(255) PRIMARY KEY,
                         requiredRank VARCHAR(255) NOT NULL,
@@ -95,13 +96,15 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                         resetDelay INT NOT NULL,
                         lastReset BIGINT NOT NULL
                     )
-                """)
+                """
+                )
             }
             println("[KPrison] ✓ Table 'mines' créée/vérifiée")
 
             // Table des blocs de la mine
             connection.createStatement().use { stmt ->
-                stmt.executeUpdate("""
+                stmt.executeUpdate(
+                    """
                     CREATE TABLE IF NOT EXISTS mine_blocks (
                         mineId VARCHAR(255) NOT NULL,
                         material VARCHAR(255) NOT NULL,
@@ -109,13 +112,15 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                         PRIMARY KEY (mineId, material),
                         FOREIGN KEY (mineId) REFERENCES mines(id) ON DELETE CASCADE
                     )
-                """)
+                """
+                )
             }
             println("[KPrison] ✓ Table 'mine_blocks' créée/vérifiée")
 
             // Table des prisonniers
             connection.createStatement().use { stmt ->
-                stmt.executeUpdate("""
+                stmt.executeUpdate(
+                    """
                     CREATE TABLE IF NOT EXISTS prisoners (
                         uuid VARCHAR(255) PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
@@ -123,13 +128,15 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                         balance DOUBLE NOT NULL DEFAULT 0.0,
                         lastUpdated BIGINT NOT NULL
                     )
-                """)
+                """
+                )
             }
             println("[KPrison] ✓ Table 'prisoners' créée/vérifiée")
 
             // Table des rangs
             connection.createStatement().use { stmt ->
-                stmt.executeUpdate("""
+                stmt.executeUpdate(
+                    """
                     CREATE TABLE IF NOT EXISTS ranks (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         name VARCHAR(255) NOT NULL UNIQUE,
@@ -137,7 +144,8 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                         requiredBalance DOUBLE NOT NULL,
                         permissions TEXT DEFAULT ''
                     )
-                """)
+                """
+                )
             }
             println("[KPrison] ✓ Table 'ranks' créée/vérifiée")
 
@@ -153,7 +161,8 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
     fun saveMine(mine: Mine) {
         try {
             val world = mine.teleportLocation.world?.name ?: "world"
-            connection.prepareStatement("""
+            connection.prepareStatement(
+                """
                 INSERT INTO mines 
                 (id, requiredRank, minX, minY, minZ, maxX, maxY, maxZ, world, teleportX, teleportY, teleportZ, resetDelay, lastReset)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -164,7 +173,8 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                 world = VALUES(world),
                 teleportX = VALUES(teleportX), teleportY = VALUES(teleportY), teleportZ = VALUES(teleportZ),
                 resetDelay = VALUES(resetDelay), lastReset = VALUES(lastReset)
-            """).use { stmt ->
+            """
+            ).use { stmt ->
                 stmt.setString(1, mine.id)
                 stmt.setString(2, mine.requiredRank)
                 stmt.setInt(3, mine.minX)
@@ -189,10 +199,12 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
             }
 
             for ((material, weight) in mine.blocks) {
-                connection.prepareStatement("""
+                connection.prepareStatement(
+                    """
                     INSERT INTO mine_blocks (mineId, material, weight) VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE weight = VALUES(weight)
-                """).use { stmt ->
+                """
+                ).use { stmt ->
                     stmt.setString(1, mine.id)
                     stmt.setString(2, material.name)
                     stmt.setDouble(3, weight)
@@ -236,7 +248,12 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                         maxX = rs.getInt("maxX"),
                         maxY = rs.getInt("maxY"),
                         maxZ = rs.getInt("maxZ"),
-                        teleportLocation = org.bukkit.Location(world, rs.getDouble("teleportX"), rs.getDouble("teleportY"), rs.getDouble("teleportZ")),
+                        teleportLocation = org.bukkit.Location(
+                            world,
+                            rs.getDouble("teleportX"),
+                            rs.getDouble("teleportY"),
+                            rs.getDouble("teleportZ")
+                        ),
                         blocks = blocks,
                         resetDelay = rs.getInt("resetDelay"),
                         lastReset = rs.getLong("lastReset")
@@ -279,12 +296,14 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
 
     fun savePrisoner(prisoner: Prisoner) {
         try {
-            connection.prepareStatement("""
+            connection.prepareStatement(
+                """
                 INSERT INTO prisoners (uuid, name, rank, balance, lastUpdated)
                 VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                 name = VALUES(name), rank = VALUES(rank), balance = VALUES(balance), lastUpdated = VALUES(lastUpdated)
-            """).use { stmt ->
+            """
+            ).use { stmt ->
                 stmt.setString(1, prisoner.uuid.toString())
                 stmt.setString(2, prisoner.name)
                 stmt.setString(3, prisoner.Rank)
@@ -336,12 +355,14 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
 
     fun saveRank(rank: Rank) {
         try {
-            connection.prepareStatement("""
+            connection.prepareStatement(
+                """
                 INSERT INTO ranks (name, level, requiredBalance, permissions)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                 level = VALUES(level), requiredBalance = VALUES(requiredBalance), permissions = VALUES(permissions)
-            """).use { stmt ->
+            """
+            ).use { stmt ->
                 stmt.setString(1, rank.name)
                 stmt.setInt(2, rank.level)
                 stmt.setDouble(3, rank.requiredBalance)
@@ -381,12 +402,14 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                 val rs = stmt.executeQuery("SELECT * FROM ranks ORDER BY level ASC")
                 while (rs.next()) {
                     val permissions = rs.getString("permissions")?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
-                    ranks.add(Rank(
-                        name = rs.getString("name"),
-                        level = rs.getInt("level"),
-                        requiredBalance = rs.getDouble("requiredBalance"),
-                        permissions = permissions
-                    ))
+                    ranks.add(
+                        Rank(
+                            name = rs.getString("name"),
+                            level = rs.getInt("level"),
+                            requiredBalance = rs.getDouble("requiredBalance"),
+                            permissions = permissions
+                        )
+                    )
                 }
             }
         } catch (e: SQLException) {

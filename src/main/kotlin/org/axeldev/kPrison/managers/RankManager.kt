@@ -12,10 +12,32 @@ class RankManager {
     }
 
     private fun loadDefaultRanks() {
-        ranks.add(Rank("A", 1, 0.0, listOf("mine.access.basic")))
-        ranks.add(Rank("B", 2, 1000.0, listOf("mine.access.basic", "mine.access.advanced")))
-        ranks.add(Rank("C", 3, 5000.0, listOf("mine.access.basic", "mine.access.advanced", "mine.access.premium")))
-        ranks.add(Rank("D", 4, 15000.0, listOf("mine.access.basic", "mine.access.advanced", "mine.access.premium", "mine.access.vip")))
+        ranks.add(
+            Rank(
+                "A",
+                1,
+                0.0,
+                listOf("mine.access.basic")))
+        ranks.add(
+            Rank(
+                "B",
+                2,
+                1000.0,
+                listOf("mine.access.basic", "mine.access.advanced")))
+        ranks.add(
+            Rank(
+                "C",
+                3,
+                5000.0,
+                listOf("mine.access.basic", "mine.access.advanced", "mine.access.premium")))
+        ranks.add(
+            Rank(
+                "D",
+                4,
+                15000.0,
+                listOf("mine.access.basic", "mine.access.advanced", "mine.access.premium", "mine.access.vip")
+            )
+        )
         ranks.sortBy { it.level }
     }
 

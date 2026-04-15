@@ -25,7 +25,8 @@ object PickaxeMenu {
 
             layout.forEach { (slot, type) ->
                 // On récupère le niveau actuel sur la pioche pour l'afficher dans le menu
-                val currentLevel = meta?.persistentDataContainer?.get(KPrison.upgradeKeys[type]!!, PersistentDataType.INTEGER) ?: 0
+                val currentLevel =
+                    meta?.persistentDataContainer?.get(KPrison.upgradeKeys[type]!!, PersistentDataType.INTEGER) ?: 0
 
                 val displayItem = ItemStack(getMaterialForType(type))
                 val dMeta = displayItem.itemMeta
@@ -45,7 +46,9 @@ object PickaxeMenu {
         private fun getMaterialForType(type: Upgrades) = when (type) {
             Upgrades.SPEED -> Material.FEATHER
             Upgrades.FORTUNE -> Material.GOLD_INGOT
-            else -> {Material.BARRIER}
+            else -> {
+                Material.BARRIER
+            }
         }
     }
 }

@@ -31,9 +31,9 @@ class MiningListener(
         // Trouver la mine où le joueur se trouve en vérifiant les coordonnées
         val mine = mineManager.getAllMines().find { mine ->
             block.world == mine.teleportLocation.world &&
-            block.x >= mine.minX && block.x <= mine.maxX &&
-            block.y >= mine.minY && block.y <= mine.maxY &&
-            block.z >= mine.minZ && block.z <= mine.maxZ
+                    block.x >= mine.minX && block.x <= mine.maxX &&
+                    block.y >= mine.minY && block.y <= mine.maxY &&
+                    block.z >= mine.minZ && block.z <= mine.maxZ
         } ?: return
 
         if (!rankManager.canPrisonerAccessMine(prisoner, mine.requiredRank)) {
