@@ -58,8 +58,8 @@ object LevelManager {
             in 1..4 -> Material.WOODEN_PICKAXE
             in 5..9 -> Material.STONE_PICKAXE
             in 10..14 -> Material.IRON_PICKAXE
-            in 15..20 -> Material.GOLDEN_PICKAXE
-            in 20..25 -> Material.DIAMOND_PICKAXE
+            in 15..19 -> Material.GOLDEN_PICKAXE
+            in 20..24 -> Material.DIAMOND_PICKAXE
             else -> Material.NETHERITE_PICKAXE
         }
     }
