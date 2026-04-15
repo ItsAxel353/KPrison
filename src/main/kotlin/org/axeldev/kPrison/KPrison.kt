@@ -79,8 +79,4 @@ class KPrison : JavaPlugin() {
         databaseManager.disconnect()
         println("[KPrison] Plugin désactivé avec succès")
     }
-
-    fun getInstance(): KPrison {
-        return this
-    }
 }
