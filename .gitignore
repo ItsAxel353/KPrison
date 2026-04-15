@@ -13,6 +13,9 @@ gradle-app.setting
 !gradle-wrapper.jar
 .gradletasknamecache
 
+# minecraft dev
+run/
+
 # Kotlin
 *.class
 *.kotlin_module
