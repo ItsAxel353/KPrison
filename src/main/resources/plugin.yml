@@ -1,0 +1,20 @@
+name: KPrison
+version: '$version'
+description: "Un plugin de prison complet avec mines, rangs et économie"
+author: AxelDev
+
+main: org.axeldev.kPrison.KPrison
+api-version: '1.21.1'
+load: POSTWORLD
+
+commands:
+  prison:
+    description: "Commandes pour le plugin prison"
+    usage: "/<command> <subcommand>"
+    aliases: [p]
+
+permissions:
+  prison.admin:
+    description: "Permission d'administrateur pour KPrison"
+    default: op
+

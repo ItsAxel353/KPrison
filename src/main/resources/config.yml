@@ -1,0 +1,132 @@
+# ╔════════════════════════════════════════════════════════════════════════════╗
+# ║                          KPrison Configuration                               ║
+# ║                     Configuration complète du plugin                          ║
+# ╚════════════════════════════════════════════════════════════════════════════╝
+
+# Configuration de la base de données
+database:
+  # Type de base de données (mariadb, mysql, sqlite)
+  # MariaDB est recommandé pour les performances optimales
+  type: "mariadb"
+
+  # Configuration MariaDB/MySQL
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "kprison"
+    username: "root"
+    password: "password"
+    useSSL: false
+
+# Configuration des mines
+mines:
+  # Temps avant réinitialisation automatique d'une mine (en secondes)
+  defaultResetDelay: 300
+  
+  # Afficher les messages de réinitialisation
+  showResetMessages: true
+
+# Configuration des rangs
+ranks:
+  # Activation des rangs
+  enabled: true
+  
+  # Rangs disponibles (du moins cher au plus cher)
+  # Format: nom_du_rang:niveau:solde_requis:permission1,permission2
+  list:
+    - "A:1:0:mine.access.basic"
+    - "B:2:1000:mine.access.advanced"
+    - "C:3:5000:mine.access.premium"
+    - "D:4:15000:mine.access.vip"
+
+# Configuration de l'économie
+economy:
+  # Récompenses par type de bloc miné
+  # Format: MATERIAL_NAME: récompense
+  rewards:
+    STONE: 1.0
+    COAL_ORE: 5.0
+    IRON_ORE: 10.0
+    GOLD_ORE: 25.0
+    DIAMOND_ORE: 100.0
+    EMERALD_ORE: 150.0
+  
+  # Symbole de devises
+  currencySymbol: "€"
+  
+  # Solde initial des nouveaux joueurs
+  initialBalance: 0.0
+
+# Configuration du scoreboard
+scoreboard:
+  # Afficher le scoreboard au join
+  showOnJoin: true
+  
+  # Fréquence de mise à jour (en ticks, 20 ticks = 1 seconde)
+  updateFrequency: 10
+  
+  # Afficher les emojis
+  showEmojis: true
+  
+  # Couleurs
+  colors:
+    title: "§6"
+    header: "§f"
+    value: "§e"
+    positive: "§a"
+    negative: "§c"
+    neutral: "§7"
+
+# Configuration des messages
+messages:
+  # Préfixe des messages
+  prefix: "§6[KPrison]§r"
+  
+  # Messages d'erreur
+  errors:
+    noPermission: "§cVous n'avez pas la permission pour faire cela."
+    mineNotFound: "§cCette mine n'existe pas."
+    invalidFormat: "§cFormat invalide. Vérifiez votre syntaxe."
+    notEnoughMoney: "§cVous n'avez pas assez d'argent."
+    notEnoughRank: "§cVous n'avez pas le rang requis pour accéder à cette mine."
+  
+  # Messages de succès
+  success:
+    mineCreated: "§aLa mine {mine} a été créée avec succès."
+    mineReset: "§aLa mine {mine} a été réinitialisée."
+    spawnSet: "§aLe spawn de la mine {mine} a été défini."
+    promoted: "§aFélicitations ! Vous avez été promu au rang {rank}."
+  
+  # Messages d'information
+  info:
+    balance: "§aVotre solde: {balance}€"
+    rank: "§aVotre rang: {rank}"
+    nextRank: "§aProchain rang: {rank} ({remaining}€)"
+
+# Configuration des logs
+logs:
+  # Activer les logs
+  enabled: true
+  
+  # Types de logs à enregistrer
+  logTypes:
+    - "mine_creation"
+    - "mine_reset"
+    - "player_promotion"
+    - "economy_transactions"
+    - "errors"
+
+# Configuration avancée
+advanced:
+  # Maximiser les performances
+  optimizeDatabase: true
+  
+  # Cache des données en mémoire
+  useCache: true
+  
+  # Délai de sauvegarde automatique (en minutes)
+  autoSaveInterval: 5
+  
+  # Afficher les logs de débogage
+  debug: false
+
