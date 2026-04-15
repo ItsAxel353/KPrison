@@ -55,11 +55,12 @@ object LevelManager {
 
     private fun getMaterialForLevel(level: Int): Material {
         return when (level) {
-            in 1..5 -> Material.WOODEN_PICKAXE
-            in 6..10 -> Material.STONE_PICKAXE
-            in 11..15 -> Material.IRON_PICKAXE
-            in 16..20 -> Material.GOLDEN_PICKAXE
-            else -> Material.DIAMOND_PICKAXE
+            in 1..4 -> Material.WOODEN_PICKAXE
+            in 5..9 -> Material.STONE_PICKAXE
+            in 10..14 -> Material.IRON_PICKAXE
+            in 15..20 -> Material.GOLDEN_PICKAXE
+            in 20..25 -> Material.DIAMOND_PICKAXE
+            else -> Material.NETHERITE_PICKAXE
         }
     }
 }
