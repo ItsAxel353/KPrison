@@ -37,6 +37,17 @@ class MineManager(private val databaseManager: DatabaseManager) {
         for (mine in mines.values) {
             if (mine.isResetDue()) {
                 mine.reset()
+                Bukkit.getServer().broadcastMessage("§6[KPrison] §eLe mine §6${mine.id} §ea été régénérée !")
+                //recupere tout les joueurs dans la mine et les téléporte au spawn
+                val teleportLocation = mine.teleportLocation
+                val world = teleportLocation.world ?: continue
+                for (player in world.players) {
+                    if (player.location.x >= mine.minX && player.location.x <= mine.maxX &&
+                        player.location.y >= mine.minY && player.location.y <= mine.maxY &&
+                        player.location.z >= mine.minZ && player.location.z <= mine.maxZ) {
+                        player.teleport(teleportLocation)
+                    }
+                }
                 regenerateMine(mine)
             }
         }
@@ -59,11 +70,6 @@ class MineManager(private val databaseManager: DatabaseManager) {
         mine.reset()
         regenerateMine(mine)
         databaseManager.saveMine(mine)
-
-        val message =
-            LegacyComponentSerializer.legacyAmpersand().deserialize("&6La mine &e${mine.id} &6a été réinitialisée !")
-        Bukkit.broadcast(message)
-
         return true
     }
 

@@ -62,8 +62,17 @@ class ScoreBoardManager(
                 objective.getScore("§7§l> §6Prochain").score = score--
                 objective.getScore("§e  §a${nextRank.name}").score = score--
 
-                val remaining = (nextRank.requiredBalance - prisoner.balance).toLong()
-                objective.getScore("§e  §7${remaining}€ restants").score = score--
+                // Calcul du montant restant avec sécurité (ne descend pas sous 0)
+                val remaining = maxOf(0L, (nextRank.requiredBalance - prisoner.balance).toLong())
+
+                if (remaining > 0) {
+                    // Affichage classique pendant la progression
+                    objective.getScore("§e  §7${remaining}€ restants").score = score--
+                } else {
+                    // Message spécial quand l'objectif est atteint
+                    objective.getScore("§e  §a✔ Objectif atteint !").score = score--
+                    objective.getScore("§e  §7Tapez §f/p promote").score = score--
+                }
 
                 // Barre de progression
                 val progressBar = createProgressBar(prisoner.balance, nextRank.requiredBalance)
@@ -90,7 +99,7 @@ class ScoreBoardManager(
 
     fun removeScoreboard(player: Player) {
         playerScoreboards.remove(player.uniqueId.toString())
-        player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+        player.scoreboard = Bukkit.getScoreboardManager().mainScoreboard
     }
 
     fun getScoreboard(player: Player): Any? {
