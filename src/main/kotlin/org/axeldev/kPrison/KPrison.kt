@@ -10,7 +10,6 @@ import org.axeldev.kPrison.managers.MineManager
 import org.axeldev.kPrison.managers.RankManager
 import org.axeldev.kPrison.managers.PrisonerManager
 import org.axeldev.kPrison.managers.ScoreBoardManager
-import org.axeldev.kPrison.menus.PickaxeMenu
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable

@@ -3,7 +3,6 @@ package org.axeldev.kPrison.items.managers
 import org.axeldev.kPrison.KPrison
 import org.axeldev.kPrison.items.KPickaxe
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 

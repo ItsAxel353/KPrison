@@ -3,8 +3,6 @@ package org.axeldev.kPrison.items
 import org.axeldev.kPrison.KPrison
 import org.axeldev.kPrison.items.upgrades.Upgrades
 import org.bukkit.Material
-import org.bukkit.attribute.Attribute
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType

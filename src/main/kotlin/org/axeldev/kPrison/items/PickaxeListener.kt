@@ -1,7 +1,6 @@
 package org.axeldev.kPrison.items
 
 import org.axeldev.kPrison.KPrison
-import org.axeldev.kPrison.core.Prisoner
 import org.axeldev.kPrison.items.managers.LevelManager
 import org.axeldev.kPrison.items.upgrades.Upgrades
 import org.axeldev.kPrison.managers.PrisonerManager

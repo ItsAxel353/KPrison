@@ -1,19 +1,16 @@
 package org.axeldev.kPrison
 
 import org.axeldev.kPrison.core.Mine
-import org.axeldev.kPrison.items.KPickaxe
 import org.axeldev.kPrison.items.KPickaxeItem
 import org.axeldev.kPrison.managers.MineManager
 import org.axeldev.kPrison.managers.RankManager
 import org.axeldev.kPrison.managers.PrisonerManager
 import org.axeldev.kPrison.menus.PickaxeMenu
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import kotlin.math.max
 import kotlin.math.min
 
