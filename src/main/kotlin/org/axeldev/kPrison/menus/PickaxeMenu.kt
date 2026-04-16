@@ -13,6 +13,7 @@ object PickaxeMenu {
         val layout = mapOf(
             11 to Upgrades.SPEED,
             13 to Upgrades.FORTUNE,
+            15 to Upgrades.EFFICIENCY,
         )
 
         fun open(player: Player) {
@@ -37,12 +38,29 @@ object PickaxeMenu {
                 displayItem.itemMeta = dMeta
                 inv.setItem(slot, displayItem)
             }
+
+            // Add repair option
+            val repairItem = ItemStack(Material.ANVIL)
+            val rMeta = repairItem.itemMeta
+            rMeta?.setDisplayName("§bRéparer la Pioche")
+            val durability = meta?.persistentDataContainer?.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
+            val repairCost = (100 - durability) * 10 // 10 per missing durability
+            rMeta?.lore = listOf(
+                "§7Durabilité actuelle: §e$durability/100",
+                "§7Prix: §6${repairCost} tokens",
+                "",
+                "§aClique pour réparer !"
+            )
+            repairItem.itemMeta = rMeta
+            inv.setItem(22, repairItem)
+
             player.openInventory(inv)
         }
 
         private fun getMaterialForType(type: Upgrades) = when (type) {
             Upgrades.SPEED -> Material.FEATHER
             Upgrades.FORTUNE -> Material.GOLD_INGOT
+            Upgrades.EFFICIENCY -> Material.DIAMOND_PICKAXE
             else -> {
                 Material.BARRIER
             }

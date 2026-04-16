@@ -22,6 +22,7 @@ class KPickaxeItem {
         // On cache le niveau 1 et l'XP 0 dans l'item
         meta.persistentDataContainer.set(KPrison.levelKey, PersistentDataType.INTEGER, 1)
         meta.persistentDataContainer.set(KPrison.xpKey, PersistentDataType.INTEGER, 0)
+        // meta.persistentDataContainer.set(KPrison.durabilityKey, PersistentDataType.INTEGER, 100)
 
         meta.setDisplayName("§bKPickaxe | §fNiveau 1")
         meta.lore = listOf("§7XP: 0 | Durabilité: 100")
@@ -33,4 +34,3 @@ class KPickaxeItem {
     }
 
 }
-

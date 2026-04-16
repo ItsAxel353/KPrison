@@ -5,10 +5,12 @@ import org.axeldev.kPrison.items.managers.LevelManager
 import org.axeldev.kPrison.items.upgrades.Upgrades
 import org.axeldev.kPrison.managers.PrisonerManager
 import org.axeldev.kPrison.menus.PickaxeMenu.UpgradeGUI
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -24,7 +26,31 @@ class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
         val item = player.inventory.itemInMainHand
 
         if (item.hasItemMeta()) {
-            LevelManager.handleBlockBreak(item)
+            val meta = item.itemMeta!!
+            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
+            if (durability <= 0) {
+                player.sendMessage("§cVotre pioche est cassée ! Réparez-la ou obtenez-en une nouvelle.")
+                event.isCancelled = true
+                return
+            }
+
+            val block = event.block
+            var (xpGain, durabilityLoss) = when (block.type) {
+                Material.STONE -> 1 to 1
+                Material.COBBLESTONE -> 1 to 1
+                Material.COAL_ORE -> 5 to 2
+                Material.IRON_ORE -> 10 to 3
+                Material.GOLD_ORE -> 15 to 4
+                Material.DIAMOND_ORE -> 20 to 5
+                Material.EMERALD_ORE -> 25 to 6
+                else -> 0 to 1
+            }
+
+            // Apply efficiency upgrade to reduce durability loss
+            val efficiencyLvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[Upgrades.EFFICIENCY]!!, PersistentDataType.INTEGER) ?: 0
+            durabilityLoss = maxOf(1, durabilityLoss - efficiencyLvl)
+
+            LevelManager.handleBlockBreak(item, xpGain, durabilityLoss)
         }
         applyPassiveEffects(player, item)
     }
@@ -35,55 +61,73 @@ class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
         event.isCancelled = true
 
         val player = event.whoClicked as Player
-        val upgrade = UpgradeGUI.layout[event.slot] ?: return // Récupère l'upgrade selon le slot
+        val upgrade = UpgradeGUI.layout[event.slot]
         val itemInHand = player.inventory.itemInMainHand
         val meta = itemInHand.itemMeta ?: return
 
-        val key = KPrison.upgradeKeys[upgrade]!!
-        val container = meta.persistentDataContainer
-        val currentLevel = container.get(key, PersistentDataType.INTEGER) ?: 0
+        if (upgrade != null) {
+            // Handle upgrade
+            val key = KPrison.upgradeKeys[upgrade]!!
+            val container = meta.persistentDataContainer
+            val currentLevel = container.get(key, PersistentDataType.INTEGER) ?: 0
 
-        // 1. Calcul du prix (ex: 500 * niveau suivant)
-        val price = (currentLevel + 1) * 500
-        val prisoner = prisonerManager.getPrisoner(player.uniqueId)
+            // 1. Calcul du prix (ex: 500 * niveau suivant)
+            val price = (currentLevel + 1) * 500
+            val prisoner = prisonerManager.getPrisoner(player.uniqueId)
 
+            // 2. VÉRIFICATION ARGENT
+            if (prisoner.balance < price) return player.sendMessage("Pas assez de sous !")
 
-        // 2. VÉRIFICATION ARGENT (À adapter selon ton plugin d'économie)
-        if (prisoner.balance < price) return player.sendMessage("Pas assez de sous !")
+            // 3. Application de l'upgrade
+            val nextLevel = currentLevel + 1
+            container.set(key, PersistentDataType.INTEGER, nextLevel)
 
-        // 3. Application de l'upgrade
-        val nextLevel = currentLevel + 1
-        container.set(key, PersistentDataType.INTEGER, nextLevel)
+            // 4. Mise à jour de la Lore
+            LevelManager.updatePickaxeLore(meta)
 
-        // 4. Mise à jour de la Lore de manière propre
-        updatePickaxeLore(meta)
+            itemInHand.itemMeta = meta
+            player.sendMessage("§a[+] ${upgrade.displayName} est maintenant niveau $nextLevel !")
 
-        itemInHand.itemMeta = meta
-        player.sendMessage("§a[+] ${upgrade.displayName} est maintenant niveau $nextLevel !")
+            // 5. On rafraîchit le menu
+            UpgradeGUI.open(player)
+        } else if (event.slot == 22) {
+            // Handle repair
+            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
+            if (durability >= 100) return player.sendMessage("§cVotre pioche est déjà en parfait état !")
 
-        // 5. On rafraîchit le menu pour mettre à jour les prix affichés
-        UpgradeGUI.open(player)
+            val repairCost = (100 - durability) * 10
+            val prisoner = prisonerManager.getPrisoner(player.uniqueId)
+
+            if (prisoner.balance < repairCost) return player.sendMessage("Pas assez de sous !")
+
+            prisoner.balance -= repairCost
+            prisonerManager.savePrisoner(prisoner)
+
+            meta.persistentDataContainer.set(KPrison.durabilityKey, PersistentDataType.INTEGER, 100)
+            LevelManager.updatePickaxeLore(meta)
+            itemInHand.itemMeta = meta
+
+            player.sendMessage("§aVotre pioche a été réparée !")
+            UpgradeGUI.open(player)
+        }
     }
 
-    fun updatePickaxeLore(meta: ItemMeta) {
-        val newLore = mutableListOf<String>()
+    @EventHandler
+    fun onBlockDrop(event: BlockDropItemEvent) {
+        val player = event.player ?: return
+        val item = player.inventory.itemInMainHand
 
-        // On remet les stats de base
-        val level = meta.persistentDataContainer.get(KPrison.levelKey, PersistentDataType.INTEGER) ?: 1
-        val xp = meta.persistentDataContainer.get(KPrison.xpKey, PersistentDataType.INTEGER) ?: 0
-        newLore.add("§7XP: §b$xp §8| §7Niveau: §f$level")
-        newLore.add("")
-        newLore.add("§6§lAméliorations:")
-
-        // On ajoute chaque upgrade si son niveau est > 0
-        Upgrades.entries.forEach { type ->
-            val lvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[type]!!, PersistentDataType.INTEGER) ?: 0
-            if (lvl > 0) {
-                newLore.add(" §8• §b${type.displayName}: §eNiveau $lvl")
+        if (item.hasItemMeta()) {
+            val meta = item.itemMeta!!
+            val fortuneLvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[Upgrades.FORTUNE]!!, PersistentDataType.INTEGER) ?: 0
+            if (fortuneLvl > 0) {
+                // Increase drops by fortune level (simple multiplier)
+                event.items.forEach { drop ->
+                    val amount = drop.itemStack.amount * (1 + fortuneLvl)
+                    drop.itemStack.amount = amount
+                }
             }
         }
-
-        meta.lore = newLore
     }
 
     fun applyPassiveEffects(player: Player, item: ItemStack) {

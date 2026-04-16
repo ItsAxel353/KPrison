@@ -26,6 +26,7 @@ class KPrison : JavaPlugin() {
     companion object {
         lateinit var levelKey: NamespacedKey
         lateinit var xpKey: NamespacedKey
+        // lateinit var durabilityKey: NamespacedKey
 
         lateinit var upgradeKeys: Map<Upgrades, NamespacedKey>
     }
@@ -41,6 +42,7 @@ class KPrison : JavaPlugin() {
 
         levelKey = NamespacedKey(this, "pick_level")
         xpKey = NamespacedKey(this, "pick_xp")
+        // durabilityKey = NamespacedKey(this, "pick_durability")
         upgradeKeys = Upgrades.entries.associateWith { NamespacedKey(this, it.keyName) }
 
         // Plugin startup logic
