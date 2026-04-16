@@ -13,9 +13,6 @@ gradle-app.setting
 !gradle-wrapper.jar
 .gradletasknamecache
 
-# minecraft dev
-run/
-
 # Kotlin
 *.class
 *.kotlin_module
@@ -31,3 +28,4 @@ logs/
 # Local config
 local.properties
 *.env
+/run/
