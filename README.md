@@ -6,6 +6,7 @@
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.20+-62B47A?style=flat-square&logo=minecraft)
 ![License](https://img.shields.io/github/license/ItsAxel353/KPrison?style=flat-square)
 ![Build](https://img.shields.io/badge/build-Gradle-02303A?style=flat-square&logo=gradle)
+[![CodeFactor](https://www.codefactor.io/repository/github/itsaxel353/kprison/badge)](https://www.codefactor.io/repository/github/itsaxel353/kprison)
 
 ---
 
