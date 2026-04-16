@@ -27,12 +27,12 @@ class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
 
         if (item.hasItemMeta()) {
             val meta = item.itemMeta!!
-            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
-            if (durability <= 0) {
-                player.sendMessage("§cVotre pioche est cassée ! Réparez-la ou obtenez-en une nouvelle.")
-                event.isCancelled = true
-                return
-            }
+//            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
+//            if (durability <= 0) {
+//                player.sendMessage("§cVotre pioche est cassée ! Réparez-la ou obtenez-en une nouvelle.")
+//                event.isCancelled = true
+//                return
+//            }
 
             val block = event.block
             var (xpGain, durabilityLoss) = when (block.type) {
@@ -103,7 +103,7 @@ class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
             prisoner.balance -= repairCost
             prisonerManager.savePrisoner(prisoner)
 
-            meta.persistentDataContainer.set(KPrison.durabilityKey, PersistentDataType.INTEGER, 100)
+            //meta.persistentDataContainer.set(KPrison.durabilityKey, PersistentDataType.INTEGER, 100)
             LevelManager.updatePickaxeLore(meta)
             itemInHand.itemMeta = meta
 
