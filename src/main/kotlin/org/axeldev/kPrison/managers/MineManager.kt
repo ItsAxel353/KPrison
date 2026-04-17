@@ -1,6 +1,5 @@
 package org.axeldev.kPrison.managers
 
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.axeldev.kPrison.core.Mine
 import org.axeldev.kPrison.database.DatabaseManager
 import org.bukkit.Bukkit

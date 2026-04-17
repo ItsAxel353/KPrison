@@ -5,21 +5,21 @@ import org.axeldev.kPrison.items.upgrades.Upgrades
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
 object PickaxeMenu {
     object UpgradeGUI {
         val layout = mapOf(
-            11 to Upgrades.SPEED,
-            13 to Upgrades.FORTUNE,
+            10 to Upgrades.EFFICIENCY,
+            12 to Upgrades.FORTUNE,
+            14 to Upgrades.UNBREAKING,
+            16 to Upgrades.SILK_TOUCH,
+            28 to Upgrades.EXPLOSIVE,
         )
 
         fun open(player: Player) {
-            val inv = Bukkit.createInventory(null, 27, "§8Amélioration de la Pioche")
+            val inv = Bukkit.createInventory(null, 36, "§8Amélioration de la Pioche")
             val itemInHand = player.inventory.itemInMainHand
             val meta = itemInHand.itemMeta
 
@@ -30,25 +30,52 @@ object PickaxeMenu {
 
                 val displayItem = ItemStack(getMaterialForType(type))
                 val dMeta = displayItem.itemMeta
-                dMeta?.setDisplayName("§b${type.displayName}")
-                dMeta?.lore = listOf(
-                    "§7Niveau actuel: §e$currentLevel",
-                    "§7Prix: §6${(currentLevel + 1) * 500} tokens",
-                    "",
-                    "§aClique pour améliorer !"
-                )
+                dMeta?.setDisplayName("§6${type.displayName}")
+
+                val lore = mutableListOf<String>()
+                lore.add("§7${type.description}")
+                lore.add("")
+                lore.add("§7Niveau: §e${currentLevel}/${type.maxLevel}")
+                if (currentLevel < type.maxLevel) {
+                    val price = (currentLevel + 1) * 1000
+                    lore.add("§7Prix upgrade: §6${price}€")
+                    lore.add("")
+                    lore.add("§a▶ Clique pour améliorer")
+                } else {
+                    lore.add("§7Status: §cMAX LEVEL")
+                }
+
+                dMeta?.lore = lore
                 displayItem.itemMeta = dMeta
                 inv.setItem(slot, displayItem)
             }
+
+            // Add repair option
+            val repairItem = ItemStack(Material.ANVIL)
+            val rMeta = repairItem.itemMeta
+            rMeta?.setDisplayName("§bRéparer la Pioche")
+            val durability = meta?.persistentDataContainer?.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 1000
+            rMeta?.lore = listOf(
+                "§7Durabilité: §e$durability/1000",
+                "",
+                if (durability >= 1000) {
+                    "§7Status: §cParfait état"
+                } else {
+                    "§a▶ Clique pour réparer"
+                }
+            )
+            repairItem.itemMeta = rMeta
+            inv.setItem(31, repairItem)
+
             player.openInventory(inv)
         }
 
         private fun getMaterialForType(type: Upgrades) = when (type) {
-            Upgrades.SPEED -> Material.FEATHER
+            Upgrades.EFFICIENCY -> Material.IRON_PICKAXE
             Upgrades.FORTUNE -> Material.GOLD_INGOT
-            else -> {
-                Material.BARRIER
-            }
+            Upgrades.UNBREAKING -> Material.NETHERITE_INGOT
+            Upgrades.SILK_TOUCH -> Material.FEATHER
+            Upgrades.EXPLOSIVE -> Material.TNT
         }
     }
 }
