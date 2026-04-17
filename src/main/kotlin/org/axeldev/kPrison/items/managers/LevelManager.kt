@@ -31,7 +31,7 @@ object LevelManager {
         // 1. On récupère les données (si elles n'existent pas, on arrête)
         val currentLevel = container.get(KPrison.levelKey, PersistentDataType.INTEGER) ?: return
         val currentXp = container.get(KPrison.xpKey, PersistentDataType.INTEGER) ?: 0
-        val currentDurability = container.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
+        val currentDurability = container.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 1000
 
         // 2. Calculer la nouvelle durabilité
         val newDurability = (currentDurability - durabilityLoss).coerceAtLeast(0)
@@ -67,7 +67,7 @@ object LevelManager {
         val xp = meta.persistentDataContainer.get(KPrison.xpKey, PersistentDataType.INTEGER) ?: 0
         val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
         newLore.add("§7XP: §b$xp §8/ §7${level * 1000}")
-        newLore.add("§7Durabilité: §b$durability §8/ §7100")
+        newLore.add("§7Durabilité: §b$durability §8/ §71000")
         newLore.add("")
         newLore.add("§6§lAméliorations:")
 

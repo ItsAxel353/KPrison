@@ -3,25 +3,37 @@ package org.axeldev.kPrison.items.upgrades
 enum class Upgrades(
     val displayName: String,
     val description: String,
-    val cost: Double,
+    val maxLevel: Int,
     val keyName: String
 ) {
-    SPEED(
-        "Vitesse",
-        "Augmente votre vitesse de déplacement.",
-        100.0,
-        "speed"
+    EFFICIENCY(
+        "Efficacité",
+        "Augmente la vitesse de minage",
+        5,
+        "efficiency"
     ),
     FORTUNE(
         "Fortune",
-        "Augmente les chances d'obtenir des ressources rares.",
-        200.0,
+        "Multiplie les drops de minerai",
+        3,
         "fortune"
     ),
-    EFFICIENCY(
-        "Efficacité",
-        "Augmente la vitesse de minage.",
-        150.0,
-        "efficiency"
+    UNBREAKING(
+        "Indestructibilité",
+        "Réduit la perte de durabilité",
+        3,
+        "unbreaking"
+    ),
+    SILK_TOUCH(
+        "Silk Touch",
+        "Mine les blocs sans transformation",
+        1,
+        "silk_touch"
+    ),
+    EXPLOSIVE(
+        "Explosif",
+        "Mine en zone circulaire",
+        3,
+        "explosive"
     ),
 }

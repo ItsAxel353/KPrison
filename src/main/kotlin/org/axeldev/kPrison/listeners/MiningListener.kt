@@ -33,19 +33,5 @@ class MiningListener(
             event.isCancelled = true
             return
         }
-
-        // Donner de l'argent basé sur le bloc
-        val reward = when (block.type) {
-            Material.STONE -> 1.0
-            Material.COAL_ORE -> 5.0
-            Material.IRON_ORE -> 10.0
-            else -> 0.0
-        }
-
-        if (reward > 0.0) {
-            prisoner.balance += reward
-            prisonerManager.savePrisoner(prisoner)
-            player.sendActionBar("§a+${reward}€, §7Solde : ${prisoner.balance}€")
-        }
     }
 }

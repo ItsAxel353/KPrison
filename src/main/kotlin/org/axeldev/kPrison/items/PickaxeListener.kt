@@ -10,10 +10,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -27,12 +25,12 @@ class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
 
         if (item.hasItemMeta()) {
             val meta = item.itemMeta!!
-//            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
-//            if (durability <= 0) {
-//                player.sendMessage("§cVotre pioche est cassée ! Réparez-la ou obtenez-en une nouvelle.")
-//                event.isCancelled = true
-//                return
-//            }
+            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 1000
+            if (durability <= 0) {
+                player.sendMessage("§c✗ Votre pioche est cassée ! Réparez-la.")
+                event.isCancelled = true
+                return
+            }
 
             val block = event.block
             var (xpGain, durabilityLoss) = when (block.type) {
@@ -46,13 +44,45 @@ class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
                 else -> 0 to 1
             }
 
-            // Apply efficiency upgrade to reduce durability loss
-            val efficiencyLvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[Upgrades.EFFICIENCY]!!, PersistentDataType.INTEGER) ?: 0
-            durabilityLoss = maxOf(1, durabilityLoss - efficiencyLvl)
+            // Apply unbreaking upgrade to reduce durability loss
+            val unbreakingLvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[Upgrades.UNBREAKING]!!, PersistentDataType.INTEGER) ?: 0
+            if (unbreakingLvl > 0) {
+                // Chaque niveau d'indestructibilité réduit de 20% la perte (diviser par 1.2, 1.4, 1.6)
+                durabilityLoss = (durabilityLoss / (1.0 + (unbreakingLvl * 0.2))).toInt().coerceAtLeast(1)
+            }
+
+            // Apply fortune upgrade - multiplie les drops
+            val fortuneLvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[Upgrades.FORTUNE]!!, PersistentDataType.INTEGER) ?: 0
+            if (fortuneLvl > 0) {
+                val multiplier = 1 + (fortuneLvl * 0.5)
+                block.drops.forEach { drop ->
+                    drop.amount = (drop.amount * multiplier).toInt().coerceAtLeast(1)
+                }
+            }
+
+            // Apply explosive upgrade - mine les blocs alentours
+            val explosiveLvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[Upgrades.EXPLOSIVE]!!, PersistentDataType.INTEGER) ?: 0
+            if (explosiveLvl > 0) {
+                val radius = explosiveLvl
+                val world = block.world
+                val centerX = block.x
+                val centerY = block.y
+                val centerZ = block.z
+
+                for (x in (centerX - radius)..(centerX + radius)) {
+                    for (y in (centerY - radius)..(centerY + radius)) {
+                        for (z in (centerZ - radius)..(centerZ + radius)) {
+                            val nearbyBlock = world.getBlockAt(x, y, z)
+                            if (nearbyBlock != block && nearbyBlock.type != Material.AIR) {
+                                nearbyBlock.breakNaturally(item)
+                            }
+                        }
+                    }
+                }
+            }
 
             LevelManager.handleBlockBreak(item, xpGain, durabilityLoss)
         }
-        applyPassiveEffects(player, item)
     }
 
     @EventHandler
@@ -71,75 +101,59 @@ class PickaxeListener(private val prisonerManager: PrisonerManager) : Listener {
             val container = meta.persistentDataContainer
             val currentLevel = container.get(key, PersistentDataType.INTEGER) ?: 0
 
-            // 1. Calcul du prix (ex: 500 * niveau suivant)
-            val price = (currentLevel + 1) * 500
+            // Vérifier si on a atteint le niveau max
+            if (currentLevel >= upgrade.maxLevel) {
+                player.sendMessage("§cCet upgrade est déjà au niveau maximum !")
+                return
+            }
+
+            // 1. Calcul du prix (ex: 1000 * niveau suivant)
+            val price = (currentLevel + 1) * 1000
             val prisoner = prisonerManager.getPrisoner(player.uniqueId)
 
             // 2. VÉRIFICATION ARGENT
-            if (prisoner.balance < price) return player.sendMessage("Pas assez de sous !")
+            if (prisoner.balance < price) return player.sendMessage("§cPas assez d'argent ! Il te manque ${price - prisoner.balance}€")
 
-            // 3. Application de l'upgrade
+            // 3. Enlever l'argent du joueur
+            prisoner.balance -= price
+            prisonerManager.savePrisoner(prisoner)
+
+            // 4. Application de l'upgrade
             val nextLevel = currentLevel + 1
             container.set(key, PersistentDataType.INTEGER, nextLevel)
 
-            // 4. Mise à jour de la Lore
+            // 5. Mise à jour de la Lore
             LevelManager.updatePickaxeLore(meta)
 
             itemInHand.itemMeta = meta
-            player.sendMessage("§a[+] ${upgrade.displayName} est maintenant niveau $nextLevel !")
+            player.sendMessage("§a✓ ${upgrade.displayName} amélioré au niveau $nextLevel !")
 
-            // 5. On rafraîchit le menu
+            // 6. On rafraîchit le menu
             UpgradeGUI.open(player)
-        } else if (event.slot == 22) {
+        } else if (event.slot == 31) {
             // Handle repair
-            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 100
-            if (durability >= 100) return player.sendMessage("§cVotre pioche est déjà en parfait état !")
+            val durability = meta.persistentDataContainer.get(KPrison.durabilityKey, PersistentDataType.INTEGER) ?: 1000
+            if (durability >= 1000) return player.sendMessage("§c✗ Votre pioche est déjà en parfait état !")
 
-            val repairCost = (100 - durability) * 10
-            val prisoner = prisonerManager.getPrisoner(player.uniqueId)
-
-            if (prisoner.balance < repairCost) return player.sendMessage("Pas assez de sous !")
-
-            prisoner.balance -= repairCost
-            prisonerManager.savePrisoner(prisoner)
-
-            //meta.persistentDataContainer.set(KPrison.durabilityKey, PersistentDataType.INTEGER, 100)
+            meta.persistentDataContainer.set(KPrison.durabilityKey, PersistentDataType.INTEGER, 1000)
             LevelManager.updatePickaxeLore(meta)
             itemInHand.itemMeta = meta
 
-            player.sendMessage("§aVotre pioche a été réparée !")
+            player.sendMessage("§a✓ Votre pioche a été réparée !")
             UpgradeGUI.open(player)
         }
-    }
 
-    @EventHandler
-    fun onBlockDrop(event: BlockDropItemEvent) {
-        val player = event.player ?: return
-        val item = player.inventory.itemInMainHand
+        fun applyPassiveEffects(player: Player, item: ItemStack) {
+            val meta = item.itemMeta ?: return
+            val container = meta.persistentDataContainer
 
-        if (item.hasItemMeta()) {
-            val meta = item.itemMeta!!
-            val fortuneLvl = meta.persistentDataContainer.get(KPrison.upgradeKeys[Upgrades.FORTUNE]!!, PersistentDataType.INTEGER) ?: 0
-            if (fortuneLvl > 0) {
-                // Increase drops by fortune level (simple multiplier)
-                event.items.forEach { drop ->
-                    val amount = drop.itemStack.amount * (1 + fortuneLvl)
-                    drop.itemStack.amount = amount
-                }
+            // EFFICIENCY -> Donne l'effet Hâte (Fast Digging)
+            val efficiencyLvl =
+                container.get(KPrison.upgradeKeys[Upgrades.EFFICIENCY]!!, PersistentDataType.INTEGER) ?: 0
+            if (efficiencyLvl > 0) {
+                // Chaque niveau = niveau de Hâte
+                player.addPotionEffect(PotionEffect(PotionEffectType.HASTE, 60, efficiencyLvl - 1, false, false))
             }
         }
     }
-
-    fun applyPassiveEffects(player: Player, item: ItemStack) {
-        val meta = item.itemMeta ?: return
-        val container = meta.persistentDataContainer
-
-        // SPEED -> Donne l'effet Hâte (Fast Digging)
-        val speedLvl = container.get(KPrison.upgradeKeys[Upgrades.SPEED]!!, PersistentDataType.INTEGER) ?: 0
-        if (speedLvl > 0) {
-            // On donne l'effet pour 2 secondes (on rafraîchit tant qu'il tient l'item)
-            player.addPotionEffect(PotionEffect(PotionEffectType.HASTE, 40, speedLvl - 1, false, false))
-        }
-    }
-
 }
