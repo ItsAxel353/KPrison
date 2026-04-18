@@ -14,16 +14,24 @@ import java.sql.SQLException
 class DatabaseManager(private val dataFolder: File, private val configManager: ConfigManager) {
 
     private lateinit var connection: Connection
+    private var databaseType = "mariadb"
 
     fun connect() {
         try {
-            val databaseType = configManager.getDatabaseType()
+            databaseType = configManager.getDatabaseType()
 
             when (databaseType.lowercase()) {
-                "mariadb", "mysql" -> connectMariaDB()
-                "sqlite" -> connectSQLite()
+                "mariadb", "mysql" -> {
+                    databaseType = "mariadb"
+                    connectMariaDB()
+                }
+                "sqlite" -> {
+                    databaseType = "sqlite"
+                    connectSQLite()
+                }
                 else -> {
                     println("[KPrison] Type de base de données inconnu: $databaseType. Utilisation de MariaDB par défaut.")
+                    databaseType = "mariadb"
                     connectMariaDB()
                 }
             }
@@ -133,9 +141,20 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
             }
             println("[KPrison] ✓ Table 'prisoners' créée/vérifiée")
 
+
             // Table des rangs
             connection.createStatement().use { stmt ->
-                stmt.executeUpdate(
+                val createRanksSQL = if (databaseType == "sqlite") {
+                    """
+                    CREATE TABLE IF NOT EXISTS ranks (
+                        id INTEGER PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL UNIQUE,
+                        level INT NOT NULL,
+                        requiredBalance DOUBLE NOT NULL,
+                        permissions TEXT DEFAULT ''
+                    )
+                """
+                } else {
                     """
                     CREATE TABLE IF NOT EXISTS ranks (
                         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -145,7 +164,8 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                         permissions TEXT DEFAULT ''
                     )
                 """
-                )
+                }
+                stmt.executeUpdate(createRanksSQL)
             }
             println("[KPrison] ✓ Table 'ranks' créée/vérifiée")
 
@@ -161,7 +181,13 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
     fun saveMine(mine: Mine) {
         try {
             val world = mine.teleportLocation.world?.name ?: "world"
-            connection.prepareStatement(
+            val mineSQL = if (databaseType == "sqlite") {
+                """
+                INSERT OR REPLACE INTO mines 
+                (id, requiredRank, minX, minY, minZ, maxX, maxY, maxZ, world, teleportX, teleportY, teleportZ, resetDelay, lastReset)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            } else {
                 """
                 INSERT INTO mines 
                 (id, requiredRank, minX, minY, minZ, maxX, maxY, maxZ, world, teleportX, teleportY, teleportZ, resetDelay, lastReset)
@@ -174,7 +200,9 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                 teleportX = VALUES(teleportX), teleportY = VALUES(teleportY), teleportZ = VALUES(teleportZ),
                 resetDelay = VALUES(resetDelay), lastReset = VALUES(lastReset)
             """
-            ).use { stmt ->
+            }
+
+            connection.prepareStatement(mineSQL).use { stmt ->
                 stmt.setString(1, mine.id)
                 stmt.setString(2, mine.requiredRank)
                 stmt.setInt(3, mine.minX)
@@ -199,12 +227,13 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
             }
 
             for ((material, weight) in mine.blocks) {
-                connection.prepareStatement(
-                    """
-                    INSERT INTO mine_blocks (mineId, material, weight) VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE weight = VALUES(weight)
-                """
-                ).use { stmt ->
+                val blockSQL = if (databaseType == "sqlite") {
+                    "INSERT OR REPLACE INTO mine_blocks (mineId, material, weight) VALUES (?, ?, ?)"
+                } else {
+                    "INSERT INTO mine_blocks (mineId, material, weight) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE weight = VALUES(weight)"
+                }
+
+                connection.prepareStatement(blockSQL).use { stmt ->
                     stmt.setString(1, mine.id)
                     stmt.setString(2, material.name)
                     stmt.setDouble(3, weight)
@@ -296,14 +325,21 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
 
     fun savePrisoner(prisoner: Prisoner) {
         try {
-            connection.prepareStatement(
+            val prisonerSQL = if (databaseType == "sqlite") {
+                """
+                INSERT OR REPLACE INTO prisoners (uuid, name, rank, balance, lastUpdated)
+                VALUES (?, ?, ?, ?, ?)
+            """
+            } else {
                 """
                 INSERT INTO prisoners (uuid, name, rank, balance, lastUpdated)
                 VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                 name = VALUES(name), rank = VALUES(rank), balance = VALUES(balance), lastUpdated = VALUES(lastUpdated)
             """
-            ).use { stmt ->
+            }
+
+            connection.prepareStatement(prisonerSQL).use { stmt ->
                 stmt.setString(1, prisoner.uuid.toString())
                 stmt.setString(2, prisoner.name)
                 stmt.setString(3, prisoner.Rank)
@@ -355,14 +391,21 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
 
     fun saveRank(rank: Rank) {
         try {
-            connection.prepareStatement(
+            val rankSQL = if (databaseType == "sqlite") {
+                """
+                INSERT OR REPLACE INTO ranks (name, level, requiredBalance, permissions)
+                VALUES (?, ?, ?, ?)
+            """
+            } else {
                 """
                 INSERT INTO ranks (name, level, requiredBalance, permissions)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                 level = VALUES(level), requiredBalance = VALUES(requiredBalance), permissions = VALUES(permissions)
             """
-            ).use { stmt ->
+            }
+
+            connection.prepareStatement(rankSQL).use { stmt ->
                 stmt.setString(1, rank.name)
                 stmt.setInt(2, rank.level)
                 stmt.setDouble(3, rank.requiredBalance)
