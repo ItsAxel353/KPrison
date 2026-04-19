@@ -16,7 +16,7 @@ data class KPickaxe(
 
 class KPickaxeItem {
     fun donnerPioche(joueur: Player): ItemStack {
-        val item = ItemStack(Material.WOODEN_PICKAXE)
+        val item = ItemStack(Material.NETHERITE_PICKAXE)
         val meta = item.itemMeta ?: return item
 
         // On cache le niveau 1 et l'XP 0 dans l'item

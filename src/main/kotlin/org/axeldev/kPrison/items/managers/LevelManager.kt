@@ -40,13 +40,6 @@ object LevelManager {
         val pickaxe = KPickaxe(level = currentLevel, durability = newDurability, XP = currentXp)
         val updated = pickaxe.addXp(xpGain)
 
-        if (updated.level > currentLevel) {
-            val newMaterial = getMaterialForLevel(updated.level)
-            if (item.type != newMaterial) {
-                item.type = newMaterial // On change l'item physiquement
-            }
-        }
-
         // 4. On enregistre les nouvelles données invisibles
         container.set(KPrison.levelKey, PersistentDataType.INTEGER, updated.level)
         container.set(KPrison.xpKey, PersistentDataType.INTEGER, updated.XP)
@@ -80,16 +73,5 @@ object LevelManager {
         }
 
         meta.lore = newLore
-    }
-
-    private fun getMaterialForLevel(level: Int): Material {
-        return when (level) {
-            in 1..4 -> Material.WOODEN_PICKAXE
-            in 5..9 -> Material.STONE_PICKAXE
-            in 10..14 -> Material.IRON_PICKAXE
-            in 15..19 -> Material.GOLDEN_PICKAXE
-            in 20..24 -> Material.DIAMOND_PICKAXE
-            else -> Material.NETHERITE_PICKAXE
-        }
     }
 }
