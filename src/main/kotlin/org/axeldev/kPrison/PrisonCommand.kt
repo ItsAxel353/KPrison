@@ -1,11 +1,9 @@
 package org.axeldev.kPrison
 
 import org.axeldev.kPrison.core.Mine
-import org.axeldev.kPrison.items.KPickaxeItem
 import org.axeldev.kPrison.managers.MineManager
-import org.axeldev.kPrison.managers.RankManager
 import org.axeldev.kPrison.managers.PrisonerManager
-import org.axeldev.kPrison.menus.PickaxeMenu
+import org.axeldev.kPrison.managers.RankManager
 import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -181,16 +179,6 @@ class PrisonCommand(
                 pos2[player.uniqueId.toString()] = player.location
                 player.sendMessage("§aPosition 2 définie à votre position.")
             }
-
-            "pickaxe" -> {
-                val pickaxe = KPickaxeItem().donnerPioche(player)
-                player.inventory.addItem(pickaxe)
-                player.sendMessage("§aVous avez reçu une KPickaxe de niveau 1.")
-            }
-
-             "upgrade" -> {
-                 PickaxeMenu.UpgradeGUI.open(player)
-             }
 
              "sellall" -> {
                  var totalMoney = 0.0
