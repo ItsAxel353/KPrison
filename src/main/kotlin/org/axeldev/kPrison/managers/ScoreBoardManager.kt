@@ -6,7 +6,8 @@ import org.bukkit.scoreboard.DisplaySlot
 
 class ScoreBoardManager(
     private val prisonerManager: PrisonerManager,
-    private val rankManager: RankManager
+    private val rankManager: RankManager,
+    private val economyManager: EconomyManager
 ) {
 
     private val playerScoreboards = mutableMapOf<String, Any>()
@@ -24,6 +25,7 @@ class ScoreBoardManager(
 
     fun updateScoreboard(player: Player, scoreboard: Any) {
         val prisoner = prisonerManager.getPrisoner(player.uniqueId)
+        val balance = economyManager.getBalance(player)
 
         if (scoreboard !is org.bukkit.scoreboard.Scoreboard) return
 
@@ -42,7 +44,7 @@ class ScoreBoardManager(
 
         // Balance
         objective.getScore("§7§l> §6Solde").score = score--
-        objective.getScore("§e  §f${String.format("%.2f", prisoner.balance)}€").score = score--
+        objective.getScore("§e  §f${String.format("%.2f", balance)}€").score = score--
 
         // Ligne vide
         objective.getScore("§1").score = score--
@@ -63,7 +65,7 @@ class ScoreBoardManager(
                 objective.getScore("§e  §a${nextRank.name}").score = score--
 
                 // Calcul du montant restant avec sécurité (ne descend pas sous 0)
-                val remaining = maxOf(0L, (nextRank.requiredBalance - prisoner.balance).toLong())
+                val remaining = maxOf(0L, (nextRank.requiredBalance - balance).toLong())
 
                 if (remaining > 0) {
                     // Affichage classique pendant la progression
@@ -75,7 +77,7 @@ class ScoreBoardManager(
                 }
 
                 // Barre de progression
-                val progressBar = createProgressBar(prisoner.balance, nextRank.requiredBalance)
+                val progressBar = createProgressBar(balance, nextRank.requiredBalance)
                 objective.getScore("§e$progressBar").score = score--
             } else {
                 objective.getScore("§7§l> §6Prochain").score = score--

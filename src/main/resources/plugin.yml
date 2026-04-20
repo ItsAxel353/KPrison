@@ -7,6 +7,9 @@ main: org.axeldev.kPrison.KPrison
 api-version: '1.21.1'
 load: POSTWORLD
 
+depend:
+  - Vault
+
 commands:
   prison:
     description: "Commandes pour le plugin prison"
@@ -17,4 +20,3 @@ permissions:
   prison.admin:
     description: "Permission d'administrateur pour KPrison"
     default: op
-

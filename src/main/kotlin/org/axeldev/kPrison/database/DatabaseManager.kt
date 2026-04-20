@@ -133,7 +133,6 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                         uuid VARCHAR(255) PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
                         rank VARCHAR(255) NOT NULL,
-                        balance DOUBLE NOT NULL DEFAULT 0.0,
                         lastUpdated BIGINT NOT NULL
                     )
                 """
@@ -327,15 +326,15 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
         try {
             val prisonerSQL = if (databaseType == "sqlite") {
                 """
-                INSERT OR REPLACE INTO prisoners (uuid, name, rank, balance, lastUpdated)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT OR REPLACE INTO prisoners (uuid, name, rank, lastUpdated)
+                VALUES (?, ?, ?, ?)
             """
             } else {
                 """
-                INSERT INTO prisoners (uuid, name, rank, balance, lastUpdated)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO prisoners (uuid, name, rank, lastUpdated)
+                VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
-                name = VALUES(name), rank = VALUES(rank), balance = VALUES(balance), lastUpdated = VALUES(lastUpdated)
+                name = VALUES(name), rank = VALUES(rank), lastUpdated = VALUES(lastUpdated)
             """
             }
 
@@ -343,8 +342,7 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                 stmt.setString(1, prisoner.uuid.toString())
                 stmt.setString(2, prisoner.name)
                 stmt.setString(3, prisoner.Rank)
-                stmt.setDouble(4, prisoner.balance)
-                stmt.setLong(5, System.currentTimeMillis())
+                stmt.setLong(4, System.currentTimeMillis())
                 stmt.executeUpdate()
             }
         } catch (e: SQLException) {
@@ -361,8 +359,7 @@ class DatabaseManager(private val dataFolder: File, private val configManager: C
                     Prisoner(
                         uuid = java.util.UUID.fromString(uuid),
                         name = rs.getString("name"),
-                        Rank = rs.getString("rank"),
-                        balance = rs.getDouble("balance")
+                        Rank = rs.getString("rank")
                     )
                 } else null
             }

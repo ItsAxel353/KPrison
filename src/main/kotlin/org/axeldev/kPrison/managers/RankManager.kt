@@ -2,8 +2,9 @@ package org.axeldev.kPrison.managers
 
 import org.axeldev.kPrison.core.Rank
 import org.axeldev.kPrison.core.Prisoner
+import org.bukkit.entity.Player
 
-class RankManager {
+class RankManager(private val economyManager: EconomyManager? = null) {
 
     private val ranks = mutableListOf<Rank>()
 
@@ -64,11 +65,12 @@ class RankManager {
         return prisonerRank.level >= requiredRank.level
     }
 
-    fun promotePrisoner(prisoner: Prisoner): Boolean {
+    fun promotePrisoner(prisoner: Prisoner, player: Player): Boolean {
         val currentRank = getRankByName(prisoner.Rank) ?: return false
         val nextRank = getNextRank(currentRank) ?: return false
-        if (prisoner.balance >= nextRank.requiredBalance) {
-            prisoner.balance -= nextRank.requiredBalance
+
+        if (economyManager?.hasBalance(player, nextRank.requiredBalance) == true) {
+            economyManager.removeBalance(player, nextRank.requiredBalance)
             prisoner.Rank = nextRank.name
             return true
         }

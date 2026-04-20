@@ -4,6 +4,7 @@ import org.axeldev.kPrison.config.ConfigManager
 import org.axeldev.kPrison.database.DatabaseManager
 import org.axeldev.kPrison.listeners.MiningListener
 import org.axeldev.kPrison.listeners.PlayerJoinListener
+import org.axeldev.kPrison.managers.EconomyManager
 import org.axeldev.kPrison.managers.MineManager
 import org.axeldev.kPrison.managers.PrisonerManager
 import org.axeldev.kPrison.managers.RankManager
@@ -15,6 +16,7 @@ class KPrison : JavaPlugin() {
 
     lateinit var configManager: ConfigManager
     lateinit var databaseManager: DatabaseManager
+    lateinit var economyManager: EconomyManager
     lateinit var mineManager: MineManager
     lateinit var rankManager: RankManager
     lateinit var prisonerManager: PrisonerManager
@@ -29,15 +31,18 @@ class KPrison : JavaPlugin() {
         databaseManager = DatabaseManager(dataFolder, configManager)
         databaseManager.connect()
 
+        // Initialiser le manager d'économie
+        economyManager = EconomyManager(this)
+
         // Plugin startup logic
         mineManager = MineManager(databaseManager)
 
-        rankManager = RankManager()
+        rankManager = RankManager(economyManager)
         prisonerManager = PrisonerManager(databaseManager)
-        scoreBoardManager = ScoreBoardManager(prisonerManager, rankManager)
+        scoreBoardManager = ScoreBoardManager(prisonerManager, rankManager, economyManager)
 
         // Enregistrer la commande
-        getCommand("prison")?.setExecutor(PrisonCommand(prisonerManager, rankManager, mineManager))
+        getCommand("prison")?.setExecutor(PrisonCommand(prisonerManager, rankManager, mineManager, economyManager))
 
         // Enregistrer le listener
         server.pluginManager.registerEvents(MiningListener(mineManager, prisonerManager, rankManager), this)
