@@ -1,6 +1,7 @@
 package org.axeldev.kPrison
 
 import org.axeldev.kPrison.core.Mine
+import org.axeldev.kPrison.managers.EconomyManager
 import org.axeldev.kPrison.managers.MineManager
 import org.axeldev.kPrison.managers.PrisonerManager
 import org.axeldev.kPrison.managers.RankManager
@@ -15,7 +16,8 @@ import kotlin.math.min
 class PrisonCommand(
     private val prisonerManager: PrisonerManager,
     private val rankManager: RankManager,
-    private val mineManager: MineManager
+    private val mineManager: MineManager,
+    private val economyManager: EconomyManager
 ) : CommandExecutor {
 
     private val pos1 = mutableMapOf<String, Location>()
@@ -50,7 +52,8 @@ class PrisonCommand(
 
         when (args.getOrNull(0)?.lowercase()) {
             "balance", "bal" -> {
-                player.sendMessage("Votre solde : ${prisoner.balance} €")
+                val balance = economyManager.getBalance(player)
+                player.sendMessage("Votre solde : ${String.format("%.2f", balance)} €")
             }
 
             "rank" -> {
@@ -58,7 +61,7 @@ class PrisonCommand(
             }
 
             "promote" -> {
-                if (rankManager.promotePrisoner(prisoner)) {
+                if (rankManager.promotePrisoner(prisoner, player)) {
                     prisonerManager.savePrisoner(prisoner)
                     player.sendTitle("§aFélicitations !", "Vous avez été promu au rang ${prisoner.Rank}.", 10, 70, 20)
                 } else {
@@ -181,34 +184,33 @@ class PrisonCommand(
             }
 
              "sellall" -> {
-                 var totalMoney = 0.0
-                 val itemPrices = mapOf(
-                     org.bukkit.Material.COBBLESTONE to 1.0,
-                     org.bukkit.Material.COAL to 5.0,
-                     org.bukkit.Material.IRON_INGOT to 10.0,
-                     org.bukkit.Material.GOLD_INGOT to 15.0,
-                     org.bukkit.Material.DIAMOND to 20.0,
-                     org.bukkit.Material.EMERALD to 25.0
-                 )
+                  var totalMoney = 0.0
+                  val itemPrices = mapOf(
+                      org.bukkit.Material.COBBLESTONE to 1.0,
+                      org.bukkit.Material.COAL to 5.0,
+                      org.bukkit.Material.IRON_INGOT to 10.0,
+                      org.bukkit.Material.GOLD_INGOT to 15.0,
+                      org.bukkit.Material.DIAMOND to 20.0,
+                      org.bukkit.Material.EMERALD to 25.0
+                  )
 
-                 val itemsToRemove = mutableListOf<org.bukkit.inventory.ItemStack>()
-                 for (item in player.inventory.contents) {
-                     if (item != null && itemPrices.containsKey(item.type)) {
-                         val price = itemPrices[item.type]!! * item.amount
-                         totalMoney += price
-                         itemsToRemove.add(item)
-                     }
-                 }
+                  val itemsToRemove = mutableListOf<org.bukkit.inventory.ItemStack>()
+                  for (item in player.inventory.contents) {
+                      if (item != null && itemPrices.containsKey(item.type)) {
+                          val price = itemPrices[item.type]!! * item.amount
+                          totalMoney += price
+                          itemsToRemove.add(item)
+                      }
+                  }
 
-                 if (totalMoney > 0.0) {
-                     itemsToRemove.forEach { player.inventory.removeItem(it) }
-                     prisoner.balance += totalMoney
-                     prisonerManager.savePrisoner(prisoner)
-                     player.sendMessage("§a✓ Vous avez vendu votre butin pour §6${totalMoney}€§a !")
-                 } else {
-                     player.sendMessage("§cVous n'avez rien à vendre.")
-                 }
-             }
+                  if (totalMoney > 0.0) {
+                      itemsToRemove.forEach { player.inventory.removeItem(it) }
+                      economyManager.addBalance(player, totalMoney)
+                      player.sendMessage("§a✓ Vous avez vendu votre butin pour §6${String.format("%.2f", totalMoney)}€§a !")
+                  } else {
+                      player.sendMessage("§cVous n'avez rien à vendre.")
+                  }
+              }
 
              else -> {
                  player.sendMessage("Commandes disponibles : /prison balance, /prison rank, /prison promote, /prison mine <id>, /prison reset <id>, /prison setspawn <id>, /prison createmine <id> <blocks>, /prison pickaxe, /prison upgrade, /prison sellall")
