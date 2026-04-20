@@ -3,7 +3,6 @@ package org.axeldev.kPrison.listeners
 import org.axeldev.kPrison.managers.MineManager
 import org.axeldev.kPrison.managers.PrisonerManager
 import org.axeldev.kPrison.managers.RankManager
-import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
