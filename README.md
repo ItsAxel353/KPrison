@@ -21,11 +21,7 @@ Built entirely in **Kotlin**, leveraging the power of the Spigot/Paper API.
 ## ✨ Features
 
 - ⛏️ **Mine system** — Customizable mines (A → Z) that auto-reset
-- 🏆 **Rank system** — Progress through ranks by spending in-game money
 - 💰 **Economy integration** — Full Vault-compatible economy support
-- 🌟 **Prestige system** — Reset your progress for exclusive rewards
-- 🔒 **Cell/Plot system** — Each player gets their own private cell
-- 📊 **Leaderboards** — Top miners and richest players
 - 🛡️ **Permissions** — Granular permission nodes for every feature
 - 💬 **Custom messages** — Fully configurable messages and prefixes
 
