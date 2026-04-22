@@ -183,38 +183,50 @@ class PrisonCommand(
                 player.sendMessage("§aPosition 2 définie à votre position.")
             }
 
-             "sellall" -> {
-                  var totalMoney = 0.0
-                  val itemPrices = mapOf(
-                      org.bukkit.Material.COBBLESTONE to 1.0,
-                      org.bukkit.Material.COAL to 5.0,
-                      org.bukkit.Material.IRON_INGOT to 10.0,
-                      org.bukkit.Material.GOLD_INGOT to 15.0,
-                      org.bukkit.Material.DIAMOND to 20.0,
-                      org.bukkit.Material.EMERALD to 25.0
-                  )
+            "stick" -> {
+                player.inventory.addItem(org.axeldev.kPrison.items.MineStick().creatMineStick())
+                player.sendMessage("§a§lCLIQUE DROIT§r §apos1 §a§lCLIQUE GAUCHE§r §apos2")
+            }
 
-                  val itemsToRemove = mutableListOf<org.bukkit.inventory.ItemStack>()
-                  for (item in player.inventory.contents) {
-                      if (item != null && itemPrices.containsKey(item.type)) {
-                          val price = itemPrices[item.type]!! * item.amount
-                          totalMoney += price
-                          itemsToRemove.add(item)
-                      }
-                  }
+            "sellall" -> {
+                var totalMoney = 0.0
+                val itemPrices = mapOf(
+                    org.bukkit.Material.COBBLESTONE to 1.0,
+                    org.bukkit.Material.COAL to 5.0,
+                    org.bukkit.Material.IRON_INGOT to 10.0,
+                    org.bukkit.Material.GOLD_INGOT to 15.0,
+                    org.bukkit.Material.DIAMOND to 20.0,
+                    org.bukkit.Material.EMERALD to 25.0
+                )
 
-                  if (totalMoney > 0.0) {
-                      itemsToRemove.forEach { player.inventory.removeItem(it) }
-                      economyManager.addBalance(player, totalMoney)
-                      player.sendMessage("§a✓ Vous avez vendu votre butin pour §6${String.format("%.2f", totalMoney)}€§a !")
-                  } else {
-                      player.sendMessage("§cVous n'avez rien à vendre.")
-                  }
-              }
+                val itemsToRemove = mutableListOf<org.bukkit.inventory.ItemStack>()
+                for (item in player.inventory.contents) {
+                    if (item != null && itemPrices.containsKey(item.type)) {
+                        val price = itemPrices[item.type]!! * item.amount
+                        totalMoney += price
+                        itemsToRemove.add(item)
+                    }
+                }
 
-             else -> {
-                 player.sendMessage("Commandes disponibles : /prison balance, /prison rank, /prison promote, /prison mine <id>, /prison reset <id>, /prison setspawn <id>, /prison createmine <id> <blocks>, /prison pickaxe, /prison upgrade, /prison sellall")
-             }
+                if (totalMoney > 0.0) {
+                    itemsToRemove.forEach { player.inventory.removeItem(it) }
+                    economyManager.addBalance(player, totalMoney)
+                    player.sendMessage(
+                        "§a✓ Vous avez vendu votre butin pour §6${
+                            String.format(
+                                "%.2f",
+                                totalMoney
+                            )
+                        }€§a !"
+                    )
+                } else {
+                    player.sendMessage("§cVous n'avez rien à vendre.")
+                }
+            }
+
+            else -> {
+                player.sendMessage("Commandes disponibles : /prison balance, /prison rank, /prison promote, /prison mine <id>, /prison reset <id>, /prison setspawn <id>, /prison createmine <id> <blocks>, /prison pickaxe, /prison upgrade, /prison sellall")
+            }
         }
         return true
     }

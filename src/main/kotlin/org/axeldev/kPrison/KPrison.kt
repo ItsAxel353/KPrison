@@ -2,6 +2,7 @@ package org.axeldev.kPrison
 
 import org.axeldev.kPrison.config.ConfigManager
 import org.axeldev.kPrison.database.DatabaseManager
+import org.axeldev.kPrison.items.MineStickListener
 import org.axeldev.kPrison.listeners.MiningListener
 import org.axeldev.kPrison.listeners.PlayerJoinListener
 import org.axeldev.kPrison.managers.EconomyManager
@@ -47,6 +48,7 @@ class KPrison : JavaPlugin() {
         // Enregistrer le listener
         server.pluginManager.registerEvents(MiningListener(mineManager, prisonerManager, rankManager), this)
         server.pluginManager.registerEvents(PlayerJoinListener(scoreBoardManager), this)
+        server.pluginManager.registerEvents(MineStickListener(), this)
 
         // Mettre à jour le scoreboard en temps réel (toutes les 0.5 secondes = 10 ticks)
         object : BukkitRunnable() {
