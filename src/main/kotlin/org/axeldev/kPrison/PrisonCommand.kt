@@ -105,6 +105,24 @@ class PrisonCommand(
                 }
             }
 
+            "resetwe" -> {
+                // Vérifier la permission
+                if (!player.hasPermission("prison.admin") && !player.isOp) {
+                    player.sendMessage("§cVous n'avez pas la permission pour réinitialiser une mine avec WorldEdit.")
+                    return true
+                }
+                val mineId = args.getOrNull(1)
+                if (mineId == null) {
+                    player.sendMessage("§cUtilisation : /prison resetwe <id>")
+                    return true
+                }
+                if (mineManager.resetMineWE(mineId)) {
+                    player.sendMessage("§aMine ${mineId} réinitialisée avec succès avec WorldEdit.")
+                } else {
+                    player.sendMessage("§cMine ${mineId} introuvable.")
+                }
+            }
+
             "setspawn" -> {
                 // Vérifier la permission
                 if (!player.hasPermission("prison.admin") && !player.isOp) {

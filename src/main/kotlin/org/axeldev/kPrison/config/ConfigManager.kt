@@ -113,7 +113,6 @@ class ConfigManager(private val dataFolder: File) {
         val logTypes = config.getStringList("logs.logTypes")
         return logTypes.contains(logType)
     }
-
     // ==================== ADVANCED ====================
 
     fun shouldOptimizeDatabase(): Boolean = config.getBoolean("advanced.optimizeDatabase", true)

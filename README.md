@@ -18,6 +18,13 @@ Built entirely in **Kotlin**, leveraging the power of the Spigot/Paper API.
 
 ---
 
+## 🚀 Screenshots
+
+**Minestick**
+Minestick allows you to set pos1 and pos2 for mines, and assign them a letter (A-Z).
+
+---
+
 ## ✨ Features
 
 - ⛏️ **Mine system** — Customizable mines (A → Z) that auto-reset
@@ -29,11 +36,12 @@ Built entirely in **Kotlin**, leveraging the power of the Spigot/Paper API.
 
 ## 🔧 Requirements
 
-| Dependency | Version |
-|------------|---------|
-| Java | 17+ |
-| Spigot / Paper | 1.20+ |
-| Vault | Latest |
+| Dependency | Version            |
+|------------|--------------------|
+| Java | 17+                |
+| Spigot / Paper | 1.21.1             |
+| Vault | Latest             |
+| worldedit | Latest             |
 | An economy plugin | (e.g. EssentialsX) |
 
 ---

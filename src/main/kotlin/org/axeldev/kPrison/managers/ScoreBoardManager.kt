@@ -13,7 +13,7 @@ class ScoreBoardManager(
     private val playerScoreboards = mutableMapOf<String, Any>()
 
     fun createScoreboard(player: Player) {
-        val scoreboardManager = Bukkit.getScoreboardManager()!!
+        val scoreboardManager = Bukkit.getScoreboardManager()
         val scoreboard = scoreboardManager.newScoreboard
         val objective = scoreboard.registerNewObjective("kprison", "dummy", "§6§lKPRISON")
         objective.displaySlot = DisplaySlot.SIDEBAR
@@ -44,7 +44,7 @@ class ScoreBoardManager(
 
         // Balance
         objective.getScore("§7§l> §6Solde").score = score--
-        objective.getScore("§e  §f${String.format("%.2f", balance)}€").score = score--
+        objective.getScore("§e  §f${formatMoney(balance)}€").score = score--
 
         // Ligne vide
         objective.getScore("§1").score = score--
@@ -69,7 +69,7 @@ class ScoreBoardManager(
 
                 if (remaining > 0) {
                     // Affichage classique pendant la progression
-                    objective.getScore("§e  §7${remaining}€ restants").score = score--
+                    objective.getScore("§e  §7${formatMoney(remaining.toDouble())}€ restants").score = score--
                 } else {
                     // Message spécial quand l'objectif est atteint
                     objective.getScore("§e  §a✔ Objectif atteint !").score = score--
@@ -86,6 +86,15 @@ class ScoreBoardManager(
         }
         objective.getScore("§7").score = score--
         objective.getScore("§eserver.ip").score = score
+    }
+
+    private fun formatMoney(amount: Double): String {
+        return when {
+            amount >= 1_000_000_000 -> String.format("%.1f", amount / 1_000_000_000) + "md"
+            amount >= 1_000_000 -> String.format("%.1f", amount / 1_000_000) + "M"
+            amount >= 1_000 -> String.format("%.1f", amount / 1_000) + "k"
+            else -> String.format("%.2f", amount)
+        }
     }
 
     private fun createProgressBar(current: Double, max: Double): String {

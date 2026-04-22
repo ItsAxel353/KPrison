@@ -16,6 +16,8 @@ class MineStickListener : Listener {
         val item = player.inventory.itemInMainHand
         val meta = item.itemMeta ?: return
 
+        if (item.type.isAir) return
+
         val displayName = meta.displayName().let {
             PlainTextComponentSerializer.plainText().serialize(it!!)
         }
@@ -60,11 +62,11 @@ class MineStickListener : Listener {
             when (event.action) {
                 Action.LEFT_CLICK_BLOCK -> {
                     setPos1(player.uniqueId.toString(), event.clickedBlock!!.location)
-                    player.sendMessage("§aPosition 1 définie à ${event.clickedBlock!!.location.blockX}, ${event.clickedBlock!!.location.blockY}, ${event.clickedBlock!!.location.blockZ}")
+                    player.sendMessage("§aPosition 1 définie (§f${event.clickedBlock!!.location.blockX}, ${event.clickedBlock!!.location.blockY}, ${event.clickedBlock!!.location.blockZ})")
                 }
                 Action.RIGHT_CLICK_BLOCK -> {
                     setPos2(player.uniqueId.toString(), event.clickedBlock!!.location)
-                    player.sendMessage("§aPosition 2 définie à ${event.clickedBlock!!.location.blockX}, ${event.clickedBlock!!.location.blockY}, ${event.clickedBlock!!.location.blockZ}")
+                    player.sendMessage("§aPosition 2 définie (§f${event.clickedBlock!!.location.blockX}, ${event.clickedBlock!!.location.blockY}, ${event.clickedBlock!!.location.blockZ})")
                 }
                 else -> return
             }

@@ -9,6 +9,7 @@ load: POSTWORLD
 
 depend:
   - Vault
+  - WorldEdit
 
 commands:
   prison:
