@@ -30,7 +30,7 @@ tasks {
 
     runServer {
         minecraftVersion("1.21.1")
-        jvmArgs("-Xms1G", "-Xmx1G")
+        jvmArgs("-Xms500M", "-Xmx1G")
     }
 
     processResources {

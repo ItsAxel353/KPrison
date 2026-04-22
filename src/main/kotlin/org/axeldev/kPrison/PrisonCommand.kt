@@ -1,6 +1,8 @@
 package org.axeldev.kPrison
 
 import org.axeldev.kPrison.core.Mine
+import org.axeldev.kPrison.items.MineStick
+import org.axeldev.kPrison.items.MineStickListener
 import org.axeldev.kPrison.managers.EconomyManager
 import org.axeldev.kPrison.managers.MineManager
 import org.axeldev.kPrison.managers.PrisonerManager
@@ -19,9 +21,6 @@ class PrisonCommand(
     private val mineManager: MineManager,
     private val economyManager: EconomyManager
 ) : CommandExecutor {
-
-    private val pos1 = mutableMapOf<String, Location>()
-    private val pos2 = mutableMapOf<String, Location>()
 
     private fun parseBlocks(blocksString: String): Map<org.bukkit.Material, Double> {
         val blocks = mutableMapOf<org.bukkit.Material, Double>()
@@ -136,8 +135,8 @@ class PrisonCommand(
                 }
                 val mineId = args[1].uppercase()
                 val blocksString = args[2]
-                val p1 = pos1[player.uniqueId.toString()]
-                val p2 = pos2[player.uniqueId.toString()]
+                val p1 = MineStickListener.getPos1(player.uniqueId.toString())
+                val p2 = MineStickListener.getPos2(player.uniqueId.toString())
                 if (p1 == null || p2 == null) {
                     player.sendMessage("§cVous devez définir pos1 et pos2 avec /prison pos1 et /prison pos2.")
                     return true
@@ -171,16 +170,6 @@ class PrisonCommand(
                 )
                 mineManager.addMine(mine)
                 player.sendMessage("§aMine ${mineId} créée avec succès.")
-            }
-
-            "pos1" -> {
-                pos1[player.uniqueId.toString()] = player.location
-                player.sendMessage("§aPosition 1 définie à votre position.")
-            }
-
-            "pos2" -> {
-                pos2[player.uniqueId.toString()] = player.location
-                player.sendMessage("§aPosition 2 définie à votre position.")
             }
 
             "stick" -> {
