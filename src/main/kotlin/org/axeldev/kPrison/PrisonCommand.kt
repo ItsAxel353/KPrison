@@ -1,6 +1,8 @@
 package org.axeldev.kPrison
 
 import org.axeldev.kPrison.core.Mine
+import org.axeldev.kPrison.items.MineStick
+import org.axeldev.kPrison.items.MineStickListener
 import org.axeldev.kPrison.managers.EconomyManager
 import org.axeldev.kPrison.managers.MineManager
 import org.axeldev.kPrison.managers.PrisonerManager
@@ -19,9 +21,6 @@ class PrisonCommand(
     private val mineManager: MineManager,
     private val economyManager: EconomyManager
 ) : CommandExecutor {
-
-    private val pos1 = mutableMapOf<String, Location>()
-    private val pos2 = mutableMapOf<String, Location>()
 
     private fun parseBlocks(blocksString: String): Map<org.bukkit.Material, Double> {
         val blocks = mutableMapOf<org.bukkit.Material, Double>()
@@ -106,6 +105,24 @@ class PrisonCommand(
                 }
             }
 
+            "resetwe" -> {
+                // Vérifier la permission
+                if (!player.hasPermission("prison.admin") && !player.isOp) {
+                    player.sendMessage("§cVous n'avez pas la permission pour réinitialiser une mine avec WorldEdit.")
+                    return true
+                }
+                val mineId = args.getOrNull(1)
+                if (mineId == null) {
+                    player.sendMessage("§cUtilisation : /prison resetwe <id>")
+                    return true
+                }
+                if (mineManager.resetMineWE(mineId)) {
+                    player.sendMessage("§aMine ${mineId} réinitialisée avec succès avec WorldEdit.")
+                } else {
+                    player.sendMessage("§cMine ${mineId} introuvable.")
+                }
+            }
+
             "setspawn" -> {
                 // Vérifier la permission
                 if (!player.hasPermission("prison.admin") && !player.isOp) {
@@ -136,8 +153,8 @@ class PrisonCommand(
                 }
                 val mineId = args[1].uppercase()
                 val blocksString = args[2]
-                val p1 = pos1[player.uniqueId.toString()]
-                val p2 = pos2[player.uniqueId.toString()]
+                val p1 = MineStickListener.getPos1(player.uniqueId.toString())
+                val p2 = MineStickListener.getPos2(player.uniqueId.toString())
                 if (p1 == null || p2 == null) {
                     player.sendMessage("§cVous devez définir pos1 et pos2 avec /prison pos1 et /prison pos2.")
                     return true
@@ -173,48 +190,50 @@ class PrisonCommand(
                 player.sendMessage("§aMine ${mineId} créée avec succès.")
             }
 
-            "pos1" -> {
-                pos1[player.uniqueId.toString()] = player.location
-                player.sendMessage("§aPosition 1 définie à votre position.")
+            "stick" -> {
+                player.inventory.addItem(org.axeldev.kPrison.items.MineStick().creatMineStick())
+                player.sendMessage("§a§lCLIQUE DROIT§r §apos1 §a§lCLIQUE GAUCHE§r §apos2")
             }
 
-            "pos2" -> {
-                pos2[player.uniqueId.toString()] = player.location
-                player.sendMessage("§aPosition 2 définie à votre position.")
+            "sellall" -> {
+                var totalMoney = 0.0
+                val itemPrices = mapOf(
+                    org.bukkit.Material.COBBLESTONE to 1.0,
+                    org.bukkit.Material.COAL to 5.0,
+                    org.bukkit.Material.IRON_INGOT to 10.0,
+                    org.bukkit.Material.GOLD_INGOT to 15.0,
+                    org.bukkit.Material.DIAMOND to 20.0,
+                    org.bukkit.Material.EMERALD to 25.0
+                )
+
+                val itemsToRemove = mutableListOf<org.bukkit.inventory.ItemStack>()
+                for (item in player.inventory.contents) {
+                    if (item != null && itemPrices.containsKey(item.type)) {
+                        val price = itemPrices[item.type]!! * item.amount
+                        totalMoney += price
+                        itemsToRemove.add(item)
+                    }
+                }
+
+                if (totalMoney > 0.0) {
+                    itemsToRemove.forEach { player.inventory.removeItem(it) }
+                    economyManager.addBalance(player, totalMoney)
+                    player.sendMessage(
+                        "§a✓ Vous avez vendu votre butin pour §6${
+                            String.format(
+                                "%.2f",
+                                totalMoney
+                            )
+                        }€§a !"
+                    )
+                } else {
+                    player.sendMessage("§cVous n'avez rien à vendre.")
+                }
             }
 
-             "sellall" -> {
-                  var totalMoney = 0.0
-                  val itemPrices = mapOf(
-                      org.bukkit.Material.COBBLESTONE to 1.0,
-                      org.bukkit.Material.COAL to 5.0,
-                      org.bukkit.Material.IRON_INGOT to 10.0,
-                      org.bukkit.Material.GOLD_INGOT to 15.0,
-                      org.bukkit.Material.DIAMOND to 20.0,
-                      org.bukkit.Material.EMERALD to 25.0
-                  )
-
-                  val itemsToRemove = mutableListOf<org.bukkit.inventory.ItemStack>()
-                  for (item in player.inventory.contents) {
-                      if (item != null && itemPrices.containsKey(item.type)) {
-                          val price = itemPrices[item.type]!! * item.amount
-                          totalMoney += price
-                          itemsToRemove.add(item)
-                      }
-                  }
-
-                  if (totalMoney > 0.0) {
-                      itemsToRemove.forEach { player.inventory.removeItem(it) }
-                      economyManager.addBalance(player, totalMoney)
-                      player.sendMessage("§a✓ Vous avez vendu votre butin pour §6${String.format("%.2f", totalMoney)}€§a !")
-                  } else {
-                      player.sendMessage("§cVous n'avez rien à vendre.")
-                  }
-              }
-
-             else -> {
-                 player.sendMessage("Commandes disponibles : /prison balance, /prison rank, /prison promote, /prison mine <id>, /prison reset <id>, /prison setspawn <id>, /prison createmine <id> <blocks>, /prison pickaxe, /prison upgrade, /prison sellall")
-             }
+            else -> {
+                player.sendMessage("Commandes disponibles : /prison balance, /prison rank, /prison promote, /prison mine <id>, /prison reset <id>, /prison setspawn <id>, /prison createmine <id> <blocks>, /prison pickaxe, /prison upgrade, /prison sellall")
+            }
         }
         return true
     }

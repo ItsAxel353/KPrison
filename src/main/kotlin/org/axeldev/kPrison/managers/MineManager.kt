@@ -1,5 +1,10 @@
 package org.axeldev.kPrison.managers
 
+import com.sk89q.worldedit.WorldEdit
+import com.sk89q.worldedit.bukkit.BukkitAdapter
+import com.sk89q.worldedit.function.pattern.RandomPattern
+import com.sk89q.worldedit.math.BlockVector3
+import com.sk89q.worldedit.regions.CuboidRegion
 import org.axeldev.kPrison.core.Mine
 import org.axeldev.kPrison.database.DatabaseManager
 import org.bukkit.Bukkit
@@ -47,7 +52,7 @@ class MineManager(private val databaseManager: DatabaseManager) {
                         player.teleport(teleportLocation)
                     }
                 }
-                regenerateMine(mine)
+                regenerateMineWE(mine)
             }
         }
     }
@@ -64,10 +69,51 @@ class MineManager(private val databaseManager: DatabaseManager) {
         }
     }
 
+    fun regenerateMineWE(mine: Mine) {
+        val bukkitWorld = mine.teleportLocation.world ?: return
+
+        // 1. Adapter le monde Bukkit pour WorldEdit
+        val worldEditWorld = BukkitAdapter.adapt(bukkitWorld)
+
+        // 2. Définir la région (les coordonnées de ta mine)
+        val selection = CuboidRegion(
+            worldEditWorld,
+            BlockVector3.at(mine.minX, mine.minY, mine.minZ),
+            BlockVector3.at(mine.maxX, mine.maxY, mine.maxZ)
+        )
+
+        // 3. Créer le Pattern de blocs basé sur tes pourcentages
+        val pattern = RandomPattern()
+
+        // Ici, on suppose que mine.materials est une Map<Material, Double>
+        // ou une liste d'objets contenant le matériau et sa probabilité.
+        mine.blocks.forEach { (material, chance) ->
+            val blockData = BukkitAdapter.adapt(material.createBlockData())
+            pattern.add(blockData, chance)
+        }
+
+        // 4. Exécuter l'opération via une EditSession
+        WorldEdit.getInstance().newEditSession(worldEditWorld).use { editSession ->
+            // On désactive l'historique (undo) pour économiser énormément de RAM sur les grosses mines
+            editSession.setFastMode(true)
+
+            // On remplit la zone d'un coup
+            editSession.setBlocks(selection, pattern)
+        }
+    }
+
     fun resetMine(mineId: String): Boolean {
         val mine = mines[mineId] ?: return false
         mine.reset()
         regenerateMine(mine)
+        databaseManager.saveMine(mine)
+        return true
+    }
+
+    fun resetMineWE(mineId: String): Boolean {
+        val mine = mines[mineId] ?: return false
+        mine.reset()
+        regenerateMineWE(mine)
         databaseManager.saveMine(mine)
         return true
     }
